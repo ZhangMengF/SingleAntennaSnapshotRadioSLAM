@@ -1,0 +1,63 @@
+<scene version="2.1.0">
+
+<!-- Materials -->
+	<bsdf type="itu-radio-material" id="concrete">
+		<string name="type" value="concrete"/>
+	</bsdf>
+
+	<bsdf type="itu-radio-material" id="wood">
+		<string name="type" value="wood"/>
+	</bsdf>
+	
+<!-- Shapes -->
+	<shape type="ply" id="Tables">
+		<string name="filename" value="meshes/Tables.ply"/>
+		<ref id="wood" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="Chairs">
+		<string name="filename" value="meshes/Chairs.ply"/>
+		<ref id="wood" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="Door">
+		<string name="filename" value="meshes/Door.ply"/>
+		<ref id="wood" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="Wall1">
+		<string name="filename" value="meshes/Wall1.ply"/>
+		<ref id="concrete" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="Wall2">
+		<string name="filename" value="meshes/Wall2.ply"/>
+		<ref id="concrete" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="Wall3">
+		<string name="filename" value="meshes/Wall3.ply"/>
+		<ref id="concrete" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="Wall4">
+		<string name="filename" value="meshes/Wall4.ply"/>
+		<ref id="concrete" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="Floor">
+		<string name="filename" value="meshes/Floor.ply"/>
+		<ref id="concrete" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="Ceiling">
+		<string name="filename" value="meshes/Ceiling.ply"/>
+		<ref id="concrete" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="Persons">
+		<string name="filename" value="meshes/Persons.ply"/>
+		<ref id="wood" name="bsdf"/>
+	</shape>
+
+</scene>
