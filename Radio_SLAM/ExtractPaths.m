@@ -18,6 +18,8 @@ function [ExtractedLoFs_UEs, ExtractedPathPowers_UEs] ...
 
     LightSpeed = 3e8;
     TsOfOFDM = 1/(SubcarrierSpacing*SubcarrierNum);
+    DelaysResolution = TsOfOFDM/OverSamplingFactor;
+    DistRes_m = DelaysResolution * LightSpeed; 
     UENum = length(SampledUEidxs_inDataset);
     APNum = length(LoFs_UEs{1});
 
@@ -31,10 +33,13 @@ function [ExtractedLoFs_UEs, ExtractedPathPowers_UEs] ...
     FirstPathLoAs = zeros(UENum,APNum);
     for UEidx = 1:UENum
         UEidx_inDataset = SampledUEidxs_inDataset(UEidx);
+        % The pilot transmission time of the UE is uniformly and randomly distributed within one delay resolution bin.
+        TransmitTimeOffSet = rand*DelaysResolution;
         for APidx = 1:APNum
-            FirstPathLoA = min(LoFs_UEs{UEidx_inDataset}{APidx});
+            FirstPathLoA = min(LoFs_UEs{UEidx_inDataset}{APidx})+TransmitTimeOffSet;
             FirstPathLoAs(UEidx,APidx) = FirstPathLoA;
-            Delays_currentUE_AP = (LoFs_UEs{UEidx_inDataset}{APidx}-FirstPathLoA)/LightSpeed;
+            % Adjust the delays used for frequency-domain channel calculation to account for the first arriving path falling off-grid (within a delay grid bin)
+            Delays_currentUE_AP = (LoFs_UEs{UEidx_inDataset}{APidx}-FirstPathLoA)/LightSpeed+mod(FirstPathLoA/LightSpeed,DelaysResolution);            
             PathGains_currentUE_AP = PathGains_UEs{UEidx_inDataset}{APidx};
             PathNum = length(Delays_currentUE_AP);
             FreqResp = zeros(SubcarrierNum/UENum,1);
@@ -49,8 +54,7 @@ function [ExtractedLoFs_UEs, ExtractedPathPowers_UEs] ...
     FreqDomainChannel_noised = FreqDomainChannel + sqrt(fdnoise_sigma2/2)*randn(UENum,APNum,SubcarrierNum/UENum) ...
                                 +sqrt(-1)*sqrt(fdnoise_sigma2/2)*randn(UENum,APNum,SubcarrierNum/UENum);
 
-    % Extract CIR using OMP
-    DelaysResolution = TsOfOFDM/OverSamplingFactor;
+    % Extract CIR using OMP    
     ColumnNum = floor(MaxDelaySpread/DelaysResolution);
     Taus_tick = (0:ColumnNum-1).'*DelaysResolution;
     MeasureMatrix = zeros(SubcarrierNum/UENum,ColumnNum);
@@ -72,11 +76,61 @@ function [ExtractedLoFs_UEs, ExtractedPathPowers_UEs] ...
             [~,SortedIdxs] = sort(abs(Est_Amps),'descend');
             Est_Taus = Est_Taus(SortedIdxs);
             Est_Amps = Est_Amps(SortedIdxs);
-            ExtractedLoFs{APidx} = FirstPathLoAs(UEidx,APidx)+Est_Taus*LightSpeed;
+            % Calculate the absolute time-of-arrival (ToA) for each path based on the multipath delays extracted by OMP.
+            ExtractedLoFs{APidx} = FirstPathLoAs(UEidx,APidx)-mod(FirstPathLoAs(UEidx,APidx),DistRes_m)+Est_Taus*LightSpeed;
             ExtractedPathPowers{APidx} = abs(Est_Amps).^2;
+
         end
         ExtractedLoFs_UEs{UEidx} = ExtractedLoFs;
         ExtractedPathPowers_UEs{UEidx} = ExtractedPathPowers;
+                                   
     end
     
+    % Randomly select 6 (UE, AP) pairs to visualize Ground Truth vs Extracted Paths
+    % figure('Name', 'Random 6 CIR Check: GT vs OMP', 'Color', 'w', 'Position', [100, 100, 1200, 600]);
+    % 
+    % NumPlots = 6;
+    % for i = 1:NumPlots
+    %     % 1. Randomly select a UE from the current batch and an AP
+    %     rand_UE_local_idx = randi(UENum);
+    %     rand_AP_idx = randi(APNum);
+    % 
+    %     % Map local UE index back to dataset index to find Ground Truth
+    %     rand_UE_dataset_idx = SampledUEidxs_inDataset(rand_UE_local_idx);
+    % 
+    %     % 2. Get Ground Truth Data
+    %     GT_Distances = LoFs_UEs{rand_UE_dataset_idx}{rand_AP_idx};
+    %     GT_Powers_dB = 10*log10(abs(PathGains_UEs{rand_UE_dataset_idx}{rand_AP_idx}).^2);
+    % 
+    %     % 3. Get Extracted Data (OMP results)
+    %     Est_Distances = ExtractedLoFs_UEs{rand_UE_local_idx}{rand_AP_idx};
+    %     Est_Powers_dB = 10*log10(ExtractedPathPowers_UEs{rand_UE_local_idx}{rand_AP_idx});
+    % 
+    %     % 4. Plotting
+    %     subplot(2, 3, i); % 2 rows, 3 cols layout
+    %     hold on; box on; grid on;
+    % 
+    %     % Plot GT (Red solid stems)
+    %     if ~isempty(GT_Distances)
+    %         stem(GT_Distances, GT_Powers_dB, 'r', 'LineWidth', 1.5, ...
+    %             'MarkerFaceColor', 'r', 'DisplayName', 'GT');
+    %     end
+    % 
+    %     % Plot Extracted (Blue dashed stems)
+    %     if ~isempty(Est_Distances)
+    %         stem(Est_Distances, Est_Powers_dB, 'b--', 'LineWidth', 1.2, ...
+    %             'Marker', 'x', 'DisplayName', 'OMP');
+    %     end
+    % 
+    %     % Labels and Title
+    %     xlabel('Distance (m)');
+    %     ylabel('Power (dB)');
+    %     title(sprintf('UE (DatasetID %d) @ AP %d', rand_UE_dataset_idx, rand_AP_idx));
+    % 
+    %     if i == 1
+    %         legend('Location', 'best');
+    %     end
+    % end
+    % sgtitle('Multipath Extraction Check: Ground Truth vs OMP');
+
 end

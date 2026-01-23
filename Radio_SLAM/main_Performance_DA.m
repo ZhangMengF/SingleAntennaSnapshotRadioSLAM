@@ -1,16 +1,18 @@
 clc
 clear
 
+rng(2026);
+
 CommonParas
 
 Paras = [120e3,150e3,180e3,210e3,240e3];% Subcarrier spacing
 Para_length = length(Paras);
 
-MCNum = 2;
+MCNum = 100;
 
 % The average distance error of TDoA positioning of path combinations
 AverDerrOfPathCombs = zeros(4,UENum,MCNum,Para_length);
-% 1-Proposed, 2-Perfect association, 3-Random association, 4-Constrained association
+% 1-Proposed, 2-Ground-Truth association, 3-Random association, 4-Constrained association
 
 [SpaceBound,pAs,UEPositions_DataSet,LoAs_UEs_DataSet,PathGains_UEs_DataSet,TrueTargetPathIndexs_UEs_DataSet] ...
     = LoadRaytracedPaths();
@@ -19,7 +21,7 @@ APNum = size(pAs,2);
 fdnoise_sigma2 = CalcuFreqDomNoiseSigma2(LoAs_UEs_DataSet,PathGains_UEs_DataSet,SubcarrierNum,SubcarrierSpacing,SNR1_dB);
 
 tic
-fprintf('Num of Monte Carlo trials%i, length of independent variable%i \n', MCNum, Para_length)
+fprintf('Num of Monte Carlo trials-%i, length of independent variable-%i \n', MCNum, Para_length)
 
 for MCidx = 1:MCNum
 
@@ -34,7 +36,7 @@ for MCidx = 1:MCNum
         [ExtractedLoAs_UEs, ExtractedPathPowers_UEs] ...
             = ExtractPaths(LoAs_UEs_DataSet,PathGains_UEs_DataSet,SampledUEidxs_inDataset,SubcarrierNum,SubcarrierSpacing,fdnoise_sigma2,MaxDelaySpread,OverSamplingFactor,delta_OMP,MaxIterNum_OMP);    
                      
-        % Prepare multipath delay observations for perfect association
+        % Prepare multipath delay observations for Ground-Truth association
         LoAs4PerfAssoci_UEs = LoAs_UEs_DataSet(SampledUEidxs_inDataset);
         for i = 1:UENum
             for j = 1:APNum
@@ -56,7 +58,7 @@ for MCidx = 1:MCNum
             UEMirrorUEGroundTruthPositions(:,5) = [pU(1);-SpaceBound(2)-pU(2);pU(3)];
             UEMirrorUEGroundTruthPositions(:,6) = [pU(1);pU(2);-pU(3)];  
             
-            % Perfect association
+            % Ground-Truth association
             LoAs4PerfAssoci = LoAs4PerfAssoci_UEs{UEidx};
             TrueTargetPathIndexs = TrueTargetPathIndexs_UEs_DataSet{SampledUEidxs_inDataset(UEidx)};
             [~,~,~,~,PerfAssociLocatedUEandMirror,~] ...
@@ -130,7 +132,7 @@ hold on
 plot(Paras*SubcarrierNum,MeanDerrs(:,3),'DisplayName','Random Association','Color','m','LineWidth',1,'Marker','^','MarkerSize',6)
 plot(Paras*SubcarrierNum,MeanDerrs(:,4),'DisplayName','Constrained Association','Color','c','LineWidth',1,'Marker','square','MarkerSize',6)
 plot(Paras*SubcarrierNum,MeanDerrs(:,1),'DisplayName','Proposed','Color','blue','LineWidth',1,'Marker','.','MarkerSize',10)
-plot(Paras*SubcarrierNum,MeanDerrs(:,2),'DisplayName','Perfect Association','Color','red','LineWidth',1,'Marker','+','MarkerSize',6)
+plot(Paras*SubcarrierNum,MeanDerrs(:,2),'DisplayName','Ground-Truth Association','Color','red','LineWidth',1,'Marker','+','MarkerSize',6)
 legend
 grid on
 xlabel('Bandwidth (Hz)')

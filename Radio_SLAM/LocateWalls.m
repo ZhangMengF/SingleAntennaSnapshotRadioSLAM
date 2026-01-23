@@ -18,9 +18,9 @@ function Wallxy = LocateWalls(Points, UEIndex, xyBounds, Tol)
         P = Points(:, i);        
         Mid = (P + UE) / 2;
             
-        if abs(P(2) - UE(2)) < Tol(2) && abs(P(3) - UE(3)) < Tol(3) && abs(Mid(1))>xyBounds(1)
+        if abs(P(2) - UE(2)) < Tol(2) && abs(Mid(1))>xyBounds(1) && abs(P(3) - UE(3)) < Tol(3) 
             x_cuts(end+1) = Mid(1);
-        elseif abs(P(1) - UE(1)) < Tol(1) && abs(P(3) - UE(3)) < Tol(3) && abs(Mid(2))>xyBounds(2)
+        elseif abs(P(1) - UE(1)) < Tol(1) && abs(Mid(2))>xyBounds(2) && abs(P(3) - UE(3)) < Tol(3) 
             y_cuts(end+1) = Mid(2);
         end
     end

@@ -1,6 +1,8 @@
 clc
 clear
 
+rng(2026);
+
 % Load parameters
 CommonParas
 
@@ -9,7 +11,7 @@ Paras = [120e3,150e3,180e3,210e3,240e3]; % Subcarrier spacing
 Para_length = length(Paras);
 
 % Num of Monte Carlo trials
-MCNum = 5;
+MCNum = 400;
 
 % Dependent variables---
 % Perfect association
@@ -65,8 +67,8 @@ LocateSuccessFlags_SNR2 = false(UENum,MCNum,Para_length);
 Map_MC_Paras_SNR2 = zeros(4,MCNum,Para_length);
 
 tic
-fprintf('Num of Monte Carlo trials%i, length of independent variable%i \n', MCNum, Para_length)
-parfor (MCidx = 1:MCNum,6) % Randomly sample UEs
+fprintf('Num of Monte Carlo trials-%i, length of independent variable-%i \n', MCNum, Para_length)
+parfor MCidx = 1:MCNum % Randomly sample UEs
 % The use of "parfor" needs "Parallel Computing Toolbox"
 % for MCidx = 1:MCNum
     % Randomly select UENum positions from all the raytraced UE positions.
@@ -155,6 +157,8 @@ parfor (MCidx = 1:MCNum,6) % Randomly sample UEs
     end
 
 end
+fprintf('take %.1f s\n',toc)
+
 
 UEPositions_GroundTruth = zeros(3,UENum,MCNum);
 for MCidx = 1:MCNum
@@ -220,6 +224,7 @@ fprintf('Data processing finished~\n')
 
 %%
 % Localization performance
+% OptimizedPerfAssociLocaErr needs more works
 figure
 hold on
 yyaxis left
@@ -227,8 +232,8 @@ ylim([0,3.5])
 ylabel('Mean Distance Error (m)')
 hl1 = plot(Paras*SubcarrierNum,LocaErr_SNR1,'-','DisplayName',"Proposed, SNR = "+num2str(SNR1_dB)+" dB",'Color','blue','LineWidth',1,'Marker','.','MarkerSize',10);
 hl2 = plot(Paras*SubcarrierNum,LocaErr_SNR2,'-','DisplayName',"Proposed, SNR = "+num2str(SNR2_dB)+" dB",'Color','blue','LineWidth',1,'Marker','o','MarkerSize',5);
-hl3 = plot(Paras*SubcarrierNum,PerfAssociLocaErr,'-','DisplayName','Perfect Association','Color','red','LineWidth',1,'Marker','+','MarkerSize',6);
-hl4 = plot(Paras*SubcarrierNum,OptimizedPerfAssociLocaErr,'-','DisplayName','Perfect Association (Optimized AP Selection)','Color','black','LineWidth',1,'Marker','*','MarkerSize',6);
+hl3 = plot(Paras*SubcarrierNum,PerfAssociLocaErr,'-','DisplayName','Ground-Truth Association','Color','red','LineWidth',1,'Marker','+','MarkerSize',6);
+% hl4 = plot(Paras*SubcarrierNum,OptimizedPerfAssociLocaErr,'-','DisplayName','Perfect Association (Optimized AP Selection)','Color','black','LineWidth',1,'Marker','*','MarkerSize',6);
 
 yyaxis right
 ylim([0,1])
@@ -236,9 +241,9 @@ ylabel('Success Rate')
 plot(Paras*SubcarrierNum,LocaRate_SNR1,'-','Color','blue','LineWidth',1,'Marker','.','MarkerSize',10)
 plot(Paras*SubcarrierNum,LocaRate_SNR2,'-','Color','blue','LineWidth',1,'Marker','o','MarkerSize',5)
 plot(Paras*SubcarrierNum,PerfAssociLocaRate,'-','Color','red','LineWidth',1,'Marker','+','MarkerSize',6)
-plot(Paras*SubcarrierNum,OptimizedPerfAssociLocaRate,'-','Color','black','LineWidth',1,'Marker','*','MarkerSize',6)
+% plot(Paras*SubcarrierNum,OptimizedPerfAssociLocaRate,'-','Color','black','LineWidth',1,'Marker','*','MarkerSize',6)
 xlabel('Bandwidth (Hz)')
-legend([hl1,hl2,hl3,hl4])
+legend([hl1,hl2,hl3])
 grid on
 
 % Mapping performance
@@ -246,8 +251,8 @@ figure
 hold on
 plot(Paras*SubcarrierNum,MapRate_SNR1,'DisplayName',"Proposed, SNR = "+num2str(SNR1_dB)+" dB",'Color','blue','LineWidth',1,'Marker','.','MarkerSize',10)
 plot(Paras*SubcarrierNum,MapRate_SNR2,'DisplayName',"Proposed, SNR = "+num2str(SNR2_dB)+" dB",'Color','blue','LineWidth',1,'Marker','o','MarkerSize',5)
-plot(Paras*SubcarrierNum,PerfAssociMapRate,'DisplayName','Perfect Association','Marker','+','MarkerSize',6)
-plot(Paras*SubcarrierNum,OptimizedPerfAssociMapRate,'DisplayName','Perfect Association (Optimized AP Selection)','Marker','*','MarkerSize',6)
+plot(Paras*SubcarrierNum,PerfAssociMapRate,'DisplayName','Ground-Truth Association','Marker','+','MarkerSize',6)
+% plot(Paras*SubcarrierNum,OptimizedPerfAssociMapRate,'DisplayName','Perfect Association (Optimized AP Selection)','Marker','*','MarkerSize',6)
 xlabel('Bandwidth (Hz)')
 ylabel('Finishing rate')
 legend
@@ -258,8 +263,8 @@ figure
 hold on
 plot(Paras*SubcarrierNum,MapErr_SNR1,'DisplayName',"Proposed, SNR = "+num2str(SNR1_dB)+" dB",'Color','blue','LineWidth',1,'Marker','.','MarkerSize',10)
 plot(Paras*SubcarrierNum,MapErr_SNR2,'DisplayName',"Proposed, SNR = "+num2str(SNR2_dB)+" dB",'Color','blue','LineWidth',1,'Marker','o','MarkerSize',5)
-plot(Paras*SubcarrierNum,PerfAssociMapErr,'DisplayName','Perfect Association','Color','red','LineWidth',1,'Marker','+','MarkerSize',6)
-plot(Paras*SubcarrierNum,OptimizedPerfAssociMapErr,'DisplayName','Perfect Association (Optimized AP Selection)','Color','black','LineWidth',1,'Marker','*','MarkerSize',6)
+plot(Paras*SubcarrierNum,PerfAssociMapErr,'DisplayName','Ground-Truth Association','Color','red','LineWidth',1,'Marker','+','MarkerSize',6)
+% plot(Paras*SubcarrierNum,OptimizedPerfAssociMapErr,'DisplayName','Perfect Association (Optimized AP Selection)','Color','black','LineWidth',1,'Marker','*','MarkerSize',6)
 xlabel('Bandwidth (Hz)')
 ylabel('Mean Absolute Error (m)')
 legend

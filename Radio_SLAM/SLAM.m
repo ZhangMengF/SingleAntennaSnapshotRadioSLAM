@@ -18,8 +18,8 @@ function [LocatedUE,LocatedPoints,HighBeliefLocatedPoints,APSelectedProbabilitie
         % Locate a UE and surrounding walls, using the multipath arrival times and powers extracted from the UE's pilot on the APs
 
     % Use the 6 paths with the highest power.
-    LoFObservations = cellfun(@(x) x(1:6), LoFObservations, 'UniformOutput', false);
-    PathPowerObservations = cellfun(@(x) x(1:6), PathPowerObservations, 'UniformOutput', false);
+    LoFObservations = cellfun(@(x) x(1:min(length(x),6)), LoFObservations, 'UniformOutput', false);          
+    PathPowerObservations = cellfun(@(x) x(1:min(length(x),6)), PathPowerObservations, 'UniformOutput', false);
     
     % Serach path combinations
     [FoundLCombs,FoundPCombs,FoundLCombsIndexs] = PathCombSearch(LoFObservations, PathPowerObservations, pAs, PowerCheckThres, MinANum, RandNumPerSeed);    
@@ -45,8 +45,8 @@ function [LocatedUE,LocatedPoints,HighBeliefLocatedPoints,APSelectedProbabilitie
     % Sort in descending order of belief
     [~,SortedIdxs] = sort(Beliefs(BaseSpaceFilteredIndexs),'descend');
     
-    % Output the points with the 20% highest belief
-    FinedIndexs = BaseSpaceFilteredIndexs(SortedIdxs(1:floor(0.2*length(SortedIdxs))));
+    % Output the points with the 15% highest belief
+    FinedIndexs = BaseSpaceFilteredIndexs(SortedIdxs(1:floor(0.15*length(SortedIdxs))));
     HighBeliefLocatedPoints = LocatedPoints(:,FinedIndexs);
 
     % Obtain the UE positioning result

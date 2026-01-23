@@ -11,9 +11,9 @@ SubcarrierSpacing = 30e3;
 delta_OMP = 1e-6;
 MaxIterNum_OMP = 15;
 MaxDelaySpread = 200e-9;
-OverSamplingFactor = 4;
+OverSamplingFactor = 1;
 % SLAM
 MinANum = 5;
-SolveWallTols = [1,1,2];
-PowerCheckThres = 10;
+SolveWallTols = [1,1,1];
+PowerCheckThres = 10;%dB
 RandNumPerSeed = 300;
