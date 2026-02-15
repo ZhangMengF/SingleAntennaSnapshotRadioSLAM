@@ -229,7 +229,7 @@ figure
 hold on
 yyaxis left
 ylim([0,3.5])
-ylabel('Mean Distance Error (m)')
+ylabel('Average Localization Error (m)')
 hl1 = plot(Paras*SubcarrierNum,LocaErr_SNR1,'-','DisplayName',"Proposed, SNR = "+num2str(SNR1_dB)+" dB",'Color','blue','LineWidth',1,'Marker','.','MarkerSize',10);
 hl2 = plot(Paras*SubcarrierNum,LocaErr_SNR2,'-','DisplayName',"Proposed, SNR = "+num2str(SNR2_dB)+" dB",'Color','blue','LineWidth',1,'Marker','o','MarkerSize',5);
 hl3 = plot(Paras*SubcarrierNum,PerfAssociLocaErr,'-','DisplayName','Ground-Truth Association','Color','red','LineWidth',1,'Marker','+','MarkerSize',6);

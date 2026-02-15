@@ -8,11 +8,10 @@ CommonParas
 Paras = [120e3,150e3,180e3,210e3,240e3];% Subcarrier spacing
 Para_length = length(Paras);
 
-MCNum = 100;
+MCNum = 50;
 
 % The average distance error of TDoA positioning of path combinations
 AverDerrOfPathCombs = zeros(4,UENum,MCNum,Para_length);
-% 1-Proposed, 2-Ground-Truth association, 3-Random association, 4-Constrained association
 
 [SpaceBound,pAs,UEPositions_DataSet,LoAs_UEs_DataSet,PathGains_UEs_DataSet,TrueTargetPathIndexs_UEs_DataSet] ...
     = LoadRaytracedPaths();
@@ -65,14 +64,14 @@ for MCidx = 1:MCNum
                 = PerfectAssociationSLAM(LoAs4PerfAssoci,TrueTargetPathIndexs,MinANum,pAs,false);
             AverDerrOfPathCombs(2,UEidx,MCidx,Paraidx) = CalcuAverDerr(PerfAssociLocatedUEandMirror,UEMirrorUEGroundTruthPositions);
 
-            % Proposed
+            % Consistency-based Association (Top 15% confidence)
             ExtractedLoAs = ExtractedLoAs_UEs{UEidx};
             ExtractedPathPowers = ExtractedPathPowers_UEs{UEidx};
             [~,LocatedPoints_AdjacentMatrix,HighBeliefLocatedPoints,APSelectedProbabilities,~] = ...
                 SLAM(ExtractedLoAs,ExtractedPathPowers,pAs,MinANum,PowerCheckThres,RandNumPerSeed,SolveWallTols);
             AverDerrOfPathCombs(1,UEidx,MCidx,Paraidx) = CalcuAverDerr(HighBeliefLocatedPoints,UEMirrorUEGroundTruthPositions);          
             
-            % Constrained association
+            % Consistency-based Association
             AverDerrOfPathCombs(4,UEidx,MCidx,Paraidx) = CalcuAverDerr(LocatedPoints_AdjacentMatrix,UEMirrorUEGroundTruthPositions);            
 
             % Random association
@@ -130,10 +129,10 @@ MeanDerrs = squeeze(mean(AverDerrOfPathCombs,[2 3],"omitnan")).';
 figure
 hold on
 plot(Paras*SubcarrierNum,MeanDerrs(:,3),'DisplayName','Random Association','Color','m','LineWidth',1,'Marker','^','MarkerSize',6)
-plot(Paras*SubcarrierNum,MeanDerrs(:,4),'DisplayName','Constrained Association','Color','c','LineWidth',1,'Marker','square','MarkerSize',6)
-plot(Paras*SubcarrierNum,MeanDerrs(:,1),'DisplayName','Proposed','Color','blue','LineWidth',1,'Marker','.','MarkerSize',10)
+plot(Paras*SubcarrierNum,MeanDerrs(:,4),'DisplayName','Consistency-based Association','Color','c','LineWidth',1,'Marker','square','MarkerSize',6)
+plot(Paras*SubcarrierNum,MeanDerrs(:,1),'DisplayName','Consistency-based Association (Top 15% confidence)','Color','blue','LineWidth',1,'Marker','.','MarkerSize',10)
 plot(Paras*SubcarrierNum,MeanDerrs(:,2),'DisplayName','Ground-Truth Association','Color','red','LineWidth',1,'Marker','+','MarkerSize',6)
 legend
 grid on
 xlabel('Bandwidth (Hz)')
-ylabel('Mean Distance Error (m)')
+ylabel('Mean Positioning Error (m)')
