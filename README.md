@@ -6,8 +6,7 @@ This repository contains two main sub-projects:
 ### 1. Radio_SLAM
 This folder implements the SLAM algorithm and evaluates its performance.
 *   **Environment**: MATLAB R2025b
-*   **Function Script:
-   *   'Base.m'
+*  ** Function Script:**'Base.m'
 *   **Main Scripts**: 
     *   `main_Performance_DA.m`
     *   `main_Performance_LoSDetection_Map.m`
